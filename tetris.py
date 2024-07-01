@@ -1,6 +1,11 @@
 # tetris.py by Vincent Mistler for YouMakeTech
 # Tetris game for the Raspberry Pi Pico Game Boy
 
+# fdufnews 2024 06 26
+# modified title_screen so it is more reactive and text flashes slowly
+# some cosmetic changes to game_over_screen
+# corrected last_button="LEFT" in game loop
+
 from micropython import const
 from PicoGameBoy import PicoGameBoy
 import time
@@ -60,6 +65,8 @@ tetrominos_colors =[PicoGameBoy.color(239,146,132),
 # Color scheme
 BLACK = PicoGameBoy.color(0,0,0)
 WHITE = PicoGameBoy.color(255,255,255)
+GREY = PicoGameBoy.color(127,127,127)
+DARK_GREY = PicoGameBoy.color(63,63,63)
 GRID_BACKGROUND_COLOR = PicoGameBoy.color(255,211,132)
 BACKGROUND_COLOR = PicoGameBoy.color(99,154,132)
 BACKGROUND_COLOR2 = PicoGameBoy.color(57,89,41)
@@ -98,21 +105,30 @@ def collision(x,y):
 
 def title_screen():
     # title screen
+    txtstate = True
     now = time.ticks_ms()
+    pgb.load_image("tetris_title.bin")
+    pgb.show()
+    color = pgb.pixel(120,120)
     while pgb.any_button()==False:
-        pgb.load_image("tetris_title.bin")
-        pgb.show()
-        
-        if time.ticks_diff(time.ticks_ms(), now) > 200:
+        if time.ticks_diff(time.ticks_ms(), now) > 500:
             now = time.ticks_ms()
-            pgb.center_text("PRESS ANY BUTTON",WHITE)
+            if txtstate:
+                x,y,lx,ly= pgb.center_text("PRESS ANY BUTTON",WHITE)
+            else:
+                pgb.rect(x, y, lx, ly, color, True)
             pgb.show()
-            while time.ticks_diff(time.ticks_ms(), now) < 200:
-                time.sleep(0.020)
-            now = time.ticks_ms()
+            txtstate = not txtstate
             
 def game_over_screen():
-    pgb.fill_rect(60,90,120,60,BLACK)
+    x = 60
+    y = 86
+    lx = 120
+    ly = 60
+    pgb.fill_rect(x,y,lx,ly,DARK_GREY)
+    pgb.rect(x,y,lx,ly,GREY)
+    pgb.rect(x+1,y+1,lx-2,ly-2,WHITE)
+    pgb.rect(x+2,y+2,lx-4,ly-4,GREY)
     pgb.center_text("GAME OVER",WHITE)
     pgb.show()
     while True:
@@ -213,7 +229,7 @@ while True:
             rotate=True
         last_button="UP"
     elif pgb.button_left():
-            last_button="RIGHT"
+            last_button="LEFT"
             dx=-1
     elif pgb.button_right():
             last_button="RIGHT"

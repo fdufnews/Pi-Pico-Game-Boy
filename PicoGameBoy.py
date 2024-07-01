@@ -1,32 +1,55 @@
 # PicoGameBoy.py by Vincent Mistler for YouMakeTech
 # A class to easily write games for the Raspberry Pi Pico Game Boy
+
+#
+# fdufnews 2024 06 26
+# added support for other hardware by making an import of hardware conf
+# added center_text returning the rect that embed displayed text
+# added center text on a specified line
+# added rotate screen
+# added constraints on x and y value in test code
+
 from machine import Pin, PWM
 from framebuf import FrameBuffer, RGB565
 from st7789 import ST7789
 from time import sleep
+#uncomment one of the following
+#import PicoGameBoy_hardware as Hard
+import gamePad_hardware as Hard
 
 class PicoGameBoy(ST7789):
     def __init__(self):
-        self.__up = Pin(2, Pin.IN, Pin.PULL_UP)
-        self.__down = Pin(3, Pin.IN, Pin.PULL_UP)
-        self.__left = Pin(4, Pin.IN, Pin.PULL_UP)
-        self.__right = Pin(5, Pin.IN, Pin.PULL_UP)
-        self.__button_A = Pin(6, Pin.IN, Pin.PULL_UP)
-        self.__button_B = Pin(7, Pin.IN, Pin.PULL_UP)
-        self.__buzzer = PWM(Pin(15))
-        super().__init__(width=240, height=240, id_=0, sck=18, mosi=19,
-                         dc=20, rst=21, cs=17, bl=22, baudrate=62500000)
+        self.__up = Pin(Hard.UP, Pin.IN, Pin.PULL_UP)
+        self.__down = Pin(Hard.DOWN, Pin.IN, Pin.PULL_UP)
+        self.__left = Pin(Hard.LEFT, Pin.IN, Pin.PULL_UP)
+        self.__right = Pin(Hard.RIGHT, Pin.IN, Pin.PULL_UP)
+        self.__button_A = Pin(Hard.A, Pin.IN, Pin.PULL_UP)
+        self.__button_B = Pin(Hard.B, Pin.IN, Pin.PULL_UP)
+        self.__buzzer = PWM(Pin(Hard.BUZZER))
+        super().__init__(width=240, height=240, id_=Hard.ID, sck=Hard.SCK, mosi=Hard.MOSI,
+                         dc=Hard.DC, rst=Hard.RST, cs=Hard.CS, bl=Hard.BKLIT, baudrate=Hard.BAUDRATE)
         
+        self.rotate(Hard.ROTATE)
         self.__fb=[] # Array of FrameBuffer objects for sprites
         self.__w=[]
         self.__h=[]
         
     # center_text(s,color) displays a text in the middle of 
     # the screen with the specified color
+    # return text frame position and size
     def center_text(self, s, color = 1):
         x = int(self.width/2)- int(len(s)/2 * 8)
         y = int(self.height/2) - 8
         self.text(s, x, y, color)
+        return(x, y,len(s) * 8, 8)
+        
+    # hcenter_text(s,y, color) displays a text in the middle of 
+    # a specified line with the specified color
+    # return text frame position and size
+    def hcenter_text(self, s, y, color = 1):
+        x = int(self.width/2)- int(len(s)/2 * 8)
+        self.text(s, x, y, color)
+        return(x, y,len(s) * 8, 8)
         
     # center_text(s,color) displays a text in the right corner of 
     # the screen with the specified color
@@ -193,4 +216,12 @@ if __name__ == "__main__":
             y=y-1
         elif pgb.button_down():
             y=y+1
-   
+        if x<0 :
+            x = 0
+        if x>239-12:
+            x = 239-12
+        if y<0 :
+            y = 0
+        if y>239-12:
+            y = 239-12
+
