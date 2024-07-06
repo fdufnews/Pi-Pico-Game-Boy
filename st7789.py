@@ -1,6 +1,10 @@
 # st7789.py by Vincent Mistler for YouMakeTech
 # MicroPython ST7789 OLED driver, SPI interfaces for the Raspberry Pi Pico Game Boy
 
+# 20240626 fdufnews
+# corrected initialization value for CASET RASET
+# added code for power_on, power_off and rotate
+
 from micropython import const
 from machine import Pin, PWM, SPI
 import framebuf
@@ -25,6 +29,7 @@ PORCTRL   = b'\xB2'
 GMCTRP1   = b'\xE0'
 GMCTRN1   = b'\xE1'
 INVOFF    = b'\x20'
+SLPIN     = b'\x10'
 SLPOUT    = b'\x11'
 DISPON    = b'\x29'
 GAMSET    = b'\x26'
@@ -97,8 +102,10 @@ class ST7789(framebuf.FrameBuffer):
         
         sleep(0.1)
         
-        self.write_cmd(CASET, b'\x00\x00\x00\xF0')
-        self.write_cmd(RASET, b'\x00\x00\x00\xF0')
+#        self.write_cmd(CASET, b'\x00\x00\x00\xF0')
+#        self.write_cmd(RASET, b'\x00\x00\x00\xF0')
+        self.write_cmd(CASET, b'\x00\x00\x00\xEF')
+        self.write_cmd(RASET, b'\x00\x00\x00\xEF')
         self.write_cmd(MADCTL, b'\x04')
         
         self.fill(0)
@@ -107,10 +114,10 @@ class ST7789(framebuf.FrameBuffer):
         self.bl.value(1)
 
     def power_off(self):
-        pass
+        self.write_cmd(SLPIN)
 
     def power_on(self):
-        pass
+        self.write_cmd(SLPOUT)
 
     def contrast(self, contrast):
         pass
@@ -119,7 +126,22 @@ class ST7789(framebuf.FrameBuffer):
         pass
 
     def rotate(self, rotate):
-        pass
+        if rotate == 0:
+            self.write_cmd(MADCTL,b'\x04')
+        if rotate == 1:
+            self.write_cmd(MADCTL,b'\x24')
+        if rotate == 2:
+            self.write_cmd(MADCTL,b'\x44')
+        if rotate == 3:
+            self.write_cmd(MADCTL,b'\x64')
+        if rotate == 4:
+            self.write_cmd(MADCTL,b'\x84')
+        if rotate == 5:
+            self.write_cmd(MADCTL,b'\xA4')
+        if rotate == 6:
+            self.write_cmd(MADCTL,b'\xC4')
+        if rotate == 7:
+            self.write_cmd(MADCTL,b'\xE4')
 
     def show(self):
         self.write_cmd(RAMWR, self.buffer)

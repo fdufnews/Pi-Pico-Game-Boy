@@ -14,21 +14,24 @@ since my screen is rotated, I added rotation support to the st7789 driver
 
 ![back of gamepad](doc/pico-1.54inch-lcd-back.png)
 ## Todo list
-- Adding a menu to call the applications
-    - this involves making some changes to the existing applications so they receive the PicoGameBoy instance from the menu instead of creating their own.
+- [x]Adding a menu to call the applications
+    - [x]this involves making some changes to the existing applications so they receive the PicoGameBoy instance from the menu instead of creating their own.
+    - [x]make menu interface a little more attractive
 - Tetris
     - level management
-    - correcting double clicks on some keys (need to locate if the problem is either in PicoGameBoy or in tetris game loop)
+    - [x]correcting double clicks on some keys (need to locate if the problem is either in PicoGameBoy or in tetris game loop)
 - Adding new games to the collection
 - Game Of Life
-    - Adding some colors to make it more attractive
-    - Adding some other rules (for example adding an age parameter to the cells and a life expectancy)
+    - [x]Adding some colors to make it more attractive
+    - [x]Adding some other rules (for example adding an age parameter to the cells and a life expectancy)
 - PicoFlappyBird
     - making it work. Currently exiting with a memory allocation error.
 - HungryRain
     - Making it a little more attractive with some sprites for the rocks and the rain for example
+    - [x]Dot blocked if a shelter is just atop of him at init
+    - [x]Need to verify that collision works as expected when testing that dot is fully shelted
     
-#Original Readme content
+# Original Readme content
 Code for the Raspberry Pi Pico Game Boy
 
 * [YouTube video](https://youtu.be/IP3QVGmd_90)
@@ -43,6 +46,7 @@ Code for the Raspberry Pi Pico Game Boy
 - tetris.py: Tetris
 - GameOfLife.py: John Conway's Game of Life
 - PicoFlappyBird.py: Flappy Bird, my son's favorite game! *** work in progress ***
+- HungryRain.py: K.G. Orphanides [HungryRain](https://codeberg.org/MightyOwlbear/Hungry_Rain/)
 
 ## Other files
 - st7789.py: MicroPython ST7789 OLED driver, SPI interface
