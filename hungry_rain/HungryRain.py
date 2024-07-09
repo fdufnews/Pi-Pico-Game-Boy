@@ -73,8 +73,8 @@ class HungryRain():
 
         self.shelters = [[0 for col in range(3)] for row in range(NUMBER_OF_SHELTER)]
         for i in range(NUMBER_OF_SHELTER):
-            self.shelters[i][0] = choice([i for i in range(10,210) if i not in (104,122)]) #excluding positions that collide with dot
-            self.shelters[i][1] = y = choice([i for i in range(10,230) if i not in (104,122)])
+            self.shelters[i][0] = choice([i for i in range(10,210) if i not in (self.x - SHELTER_WIDTH - 1, self.x + DOT_WIDTH + 1)]) #excluding positions that collide with dot
+            self.shelters[i][1] = y = choice([i for i in range(10,240-DOT_HEIGHT-SHELTER_HEIGHT-1) if i not in (self.y - SHELTER_HEIGHT -1, self.y + DOT_HEIGHT+1)])
             self.shelters[i][2] = 233 - y
 
         self.run_game = True
@@ -94,19 +94,14 @@ class HungryRain():
             return True
 
     # test if dot is shelted by some object same arguments as collision
-    def is_shelted_by(self,x1,y1,w1,h1,x2,y2,w2,h2):
-        if y1 < y2:
-            return False
-        if x1 < x2:
-            return False
-        if x1 + w1 > x2 + w2:
-            return False
-        else:
-            return True
-
+    def is_shelted_by(self,x1,y1,w1,h1,x2,y2,w2,h2,s):
+        if y1 > y2:
+            s |= {i for i in range(x2, x2+w2)}
+        return s
 
     #instructions
     def intro(self):
+        self._pgb.fill(BACKGROUND_COLOR)
         self._pgb.text("HUNGRY RAIN",80,25,WHITE)
         self._pgb.text("You are dot.",20,40,WHITE)
         self._pgb.sprite(2,20,50)
@@ -212,9 +207,11 @@ class HungryRain():
                 # water is deadly
                 if self.flood:
                     self.gameover = True
+                    s=set()
                     for i in range(NUMBER_OF_SHELTER):
-                        if self.is_shelted_by(self.x, self.y,DOT_WIDTH, DOT_HEIGHT, self.shelters[i][0], self.shelters[i][1], SHELTER_WIDTH, self.shelters[i][2]):
-                            self.gameover = False
+                        s = self.is_shelted_by(self.x, self.y,DOT_WIDTH, DOT_HEIGHT, self.shelters[i][0], self.shelters[i][1], SHELTER_WIDTH, SHELTER_HEIGHT, s)
+                    self.gameover = not({i for i in range(self.x, self.x+DOT_WIDTH)} <= s)
+
 
                 #food! (generate random position for food)
                 if self.food_available==False:

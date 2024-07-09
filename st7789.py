@@ -4,6 +4,9 @@
 # 20240626 fdufnews
 # corrected initialization value for CASET RASET
 # added code for power_on, power_off and rotate
+# added backlight function to set backlight level
+# 20240707 fdufnews
+# added limits to the percent argument of backlight function
 
 from micropython import const
 from machine import Pin, PWM, SPI
@@ -51,7 +54,7 @@ class ST7789(framebuf.FrameBuffer):
         self.dc = Pin(dc, Pin.OUT)
         self.rst = Pin(rst, Pin.OUT)
         self.cs = Pin(cs, Pin.OUT)
-        self.bl = Pin(bl, Pin.OUT)
+        self.bl = PWM(Pin(bl, Pin.OUT), freq=1000, duty_u16=32768)
 
         self.buffer = memoryview(bytearray(self.height * self.width * 2))
         super().__init__(self.buffer, self.width, self.height, framebuf.RGB565)
@@ -77,8 +80,8 @@ class ST7789(framebuf.FrameBuffer):
         sleep(0.150)
         self.rst.value(1)
         sleep(0.150)
-        
-        self.bl.value(0) # Turn backlight off initially to avoid nasty surprises
+
+        self.bl.duty_u16(0)
 
         self.write_cmd(SWRESET)
         sleep(0.150)
@@ -111,7 +114,8 @@ class ST7789(framebuf.FrameBuffer):
         self.fill(0)
         self.show()
         sleep(0.050)
-        self.bl.value(1)
+
+        self.bl.duty_u16(32768)
 
     def power_off(self):
         self.write_cmd(SLPIN)
@@ -145,7 +149,14 @@ class ST7789(framebuf.FrameBuffer):
 
     def show(self):
         self.write_cmd(RAMWR, self.buffer)
-    
+
+    def backlight(self, percent):
+        if percent < 0:
+            percent = 0
+        if percent > 100:
+            percent = 100
+        self.bl.duty_u16(int(percent * 65535/100))
+
     def color(r, g, b):
         """
         color(r, g, b) returns a 16 bits integer color code for the ST7789 display

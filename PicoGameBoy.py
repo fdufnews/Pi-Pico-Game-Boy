@@ -2,15 +2,21 @@
 # A class to easily write games for the Raspberry Pi Pico Game Boy
 
 #
-# fdufnews 2024 06 26
+# 2024 06 26 fdufnews
 # added support for other hardware by making an import of hardware conf
 # added center_text returning the rect that embed displayed text
 # added center text on a specified line
 # added rotate screen
 # added constraints on x and y value in test code
 #
-# fdufnews 2024 07 05
+# 2024 07 05 fdufnews
 # added sprites_clear()
+#
+# 2024 07 07 fdufnews
+# added management of settings
+# get_settings: read a configuration file
+# get_settings_for, set_settings_for: get/set settings for a specified subset of the settings file
+
 
 from machine import Pin, PWM, deepsleep
 from framebuf import FrameBuffer, RGB565
@@ -19,6 +25,7 @@ from time import sleep
 #uncomment one of the following
 #import PicoGameBoy_hardware as Hard
 import gamePad_hardware as Hard
+import json
 
 class PicoGameBoy(ST7789):
     def __init__(self):
@@ -36,6 +43,40 @@ class PicoGameBoy(ST7789):
         self.__fb=[] # Array of FrameBuffer objects for sprites
         self.__w=[]
         self.__h=[]
+        self._settings={}
+        self.get_settings()
+
+    # get_settings(file)
+    # read the json file and populate the settings dictionnary
+    # return True if successfull or false if file is missing
+    def get_settings(self, filename='PicoGameBoy.json'):
+        try:
+            self.filename = filename
+            file = open(filename, 'r')
+        except OSError:
+            print(filename, ' file is missing')
+            self._settings = {}
+            return False
+        else:
+            self._settings = json.load(file)
+            file.close()
+            return True
+
+    # get_settings_for(key)
+    # return the dictionnary associated with key
+    # if key is missing in the dictionnary return an empty one
+    def get_settings_for(self, key):
+        return self._settings.get(key,{})
+
+    # set_settings_for(key, setting, saveToFile)
+    # update/create the dictionnary associated with key with setting
+    # if saveToFile is True the settings file is updated
+    def set_settings_for(self, key, setting, saveToFile):
+        self._settings[key] = setting
+        if saveToFile:
+            file = open(self.filename, 'w')
+            json.dump(self._settings, file)
+            file.close()
 
     # center_text(s,color) displays a text in the middle of 
     # the screen with the specified color
@@ -54,7 +95,7 @@ class PicoGameBoy(ST7789):
         self.text(s, x, y, color)
         return(x, y,len(s) * 8, 8)
 
-    # center_text(s,color) displays a text in the right corner of 
+    # top_right_corner_text(s,color) displays a text in the right corner of 
     # the screen with the specified color
     def top_right_corner_text(self, s, color = 1):
         x = self.width - int(len(s) * 8)

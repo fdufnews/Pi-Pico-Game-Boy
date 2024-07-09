@@ -4,15 +4,31 @@ This is a fork of [YouMakeTech Pi-Pico-Game-Boy](https://github.com/YouMakeTech/
 
 ## Why changing
 The Pi-Pico-Game-Boy project is really interesting but the hardware I have is different from the one YouMakeTech used.
-
-To make it usable by any similar hardware, I have made hardware definition files that are imported in PicoGameBoy.py so it is transparent to the applications.
-
-since my screen is rotated, I added rotation support to the st7789 driver
-
-## Hardware used
+Hardware I am using
 ![front of gamepad](doc/pico-1.54inch-lcd-front.png)
 
 ![back of gamepad](doc/pico-1.54inch-lcd-back.png)
+
+## The changes
+### Hardware definition file
+To make it usable by any similar hardware, I have made hardware definition files that are imported in PicoGameBoy.py so it is transparent to the applications.
+The definition file, defines:
+- the GPIOs the keys are connected to,
+- the GPIO the buzzer is connected to,
+- the GPIOs the display is connected to, the ID of the SPI and its baudrate
+- the orientation of the display to do so I added rotation support to the st7789 driver
+
+### PicoGameBoy.py
+- integration of the hardware definition file
+- central management of a configuration file shared between the games. Each game has a key used to identify its configuration data and PicoGameBoy can extract those data from the configuration file and deliver them to the game. On the other hand the game can send the data to PicoGameBoy which save them in the configuration file.
+The configuration file is a json one similar to the following:
+```
+{{"menu": {"backlight": 50, "sound": true, "background": "menu_freckle.bin"},
+"gamex":{"key1": value1, "keyx"":valuex}}
+```
+### Menu
+I have added a menu.py that makes a list of games and launch them.
+
 ## Todo list
 - [x]Adding a menu to call the applications
     - [x]this involves making some changes to the existing applications so they receive the PicoGameBoy instance from the menu instead of creating their own.
@@ -21,6 +37,7 @@ since my screen is rotated, I added rotation support to the st7789 driver
     - level management
     - [x]correcting double clicks on some keys (need to locate if the problem is either in PicoGameBoy or in tetris game loop)
 - Adding new games to the collection
+    -[x]Added Pico2048
 - Game Of Life
     - [x]Adding some colors to make it more attractive
     - [x]Adding some other rules (for example adding an age parameter to the cells and a life expectancy)

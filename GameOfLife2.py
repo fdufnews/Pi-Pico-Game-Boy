@@ -93,6 +93,7 @@ class GameOfLife2():
             self.board[random.randint(0,self.BOARD_SIZE_Y-1)][random.randint(0,self.BOARD_SIZE_X-1)] = NEW_BORN
 
     def title_screen(self):
+        self._pgb.fill(BACKGROUND_COLOR)
         x,y,lx,ly = self._pgb.center_text('Game Of Life', WHITE)
         self._pgb.show()
         sleep(2)
@@ -108,6 +109,7 @@ class GameOfLife2():
         sleep(2)
 
     def begin(self):
+        self.title_screen()
         self.clear_board()
         self.populate_board()
         pop = 1
