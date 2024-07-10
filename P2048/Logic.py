@@ -1,4 +1,7 @@
 # 2048 Logic.py
+#
+# 2024 07 10 fdufnews
+# added score
 
 import random
 
@@ -16,13 +19,14 @@ class Logic:
     
     # current board matrix
     mat = []
-    
+    score = 0
     # list of board moves for animation
     moves = []
     
     def reset_game(self):
         # 4 columns by 4 rows board filled with blanks [1].
         self.mat = []
+        self.score = 0
         for i in range(4):
             self.mat.append([1] * 4)
 
@@ -114,6 +118,7 @@ class Logic:
                     if self.mat[i][j] == self.mat[i+1][j] and self.mat[i][j] != 1:
                         self.mat[i][j] += self.mat[i+1][j]
                         self.mat[i+1][j] = 1
+                        self.score += self.mat[i][j]
                         merged = True
                         changed = True
                 else: # skip and allow merge the next block

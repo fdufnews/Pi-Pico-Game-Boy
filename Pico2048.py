@@ -5,6 +5,10 @@
 # 2024 07 09 fdufnews
 # converted to a class to call it from a global menu
 # put sprites in files instead of including them in a .py to save space in memory
+#
+# 2024 07 10 fdufnews
+# added score
+
 
 from PicoGameBoy import PicoGameBoy
 from P2048.Logic import Logic
@@ -73,9 +77,11 @@ class Pico2048:
                     for s_i in range(0, 12):
                         if mat[i][j] == 2 ** s_i:
                             self.draw_cell(i, j, s_i)
-                            break;        
+                            break;
+            self._pgb.rect(X_OFFSET + 2, 0, 240 - 2 * X_OFFSET - 4, Y_OFFSET - 1, EMPTY_CELL, True)
+            self._pgb.text('Score {}'.format(self._l.score), X_OFFSET + 10, 6, WHITE)
             self._pgb.show()
-            time.sleep_ms(10)      
+            time.sleep_ms(10)
 
     def play_tune(self, tune):
         for el in tune:
